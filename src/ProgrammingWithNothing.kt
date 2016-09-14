@@ -2,13 +2,15 @@ import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
 import org.junit.Test
 
-val ZERO = { p: (Any) -> Any -> { x: Any -> x } }
-val ONE = { p: (Any) -> Any -> { x: Any -> p(x) } }
-val TWO = { p: (Any) -> Any -> { x: Any -> p(p(x)) } }
-val THREE = { p: (Any) -> Any -> { x: Any -> p(p(p(x))) } }
-val FIVE = { p: (Any) -> Any -> { x: Any -> p(p(p(p(p(x))))) } }
-val FIFTEEN = { p: (Any) -> Any -> { x: Any -> p(p(p(p(p(p(p(p(p(p(p(p(p(p(p(x))))))))))))))) } }
-val HUNDRED = { p: (Any) -> Any -> { x: Any ->
+typealias NUMBER = ((Any) -> Any) -> (Any) -> Any
+
+val ZERO: NUMBER = { p -> { x -> x } }
+val ONE: NUMBER = { p -> { x -> p(x) } }
+val TWO: NUMBER = { p -> { x -> p(p(x)) } }
+val THREE: NUMBER = { p -> { x -> p(p(p(x))) } }
+val FIVE: NUMBER = { p -> { x -> p(p(p(p(p(x))))) } }
+val FIFTEEN: NUMBER = { p -> { x -> p(p(p(p(p(p(p(p(p(p(p(p(p(p(p(x))))))))))))))) } }
+val HUNDRED: NUMBER = { p -> { x ->
     p(p(p(p(p(p(p(p(p(p(p(p(p(p(p(p(p(p(p(p(
     p(p(p(p(p(p(p(p(p(p(p(p(p(p(p(p(p(p(p(p(
     p(p(p(p(p(p(p(p(p(p(p(p(p(p(p(p(p(p(p(p(
@@ -17,59 +19,35 @@ val HUNDRED = { p: (Any) -> Any -> { x: Any ->
     )))))))))))))))))))))))))))))))))))))))))
     )))))))))))))))))))))))))))))))))))))))))
     ))))))))))))))))))
-} }
+}}
 
-fun (((Any) -> Any) -> (Any) -> Any).toInteger(): Int = this({ x -> (x as Int) + 1 })(0) as Int
-
-class NumbersTest {
-    @Test fun `conversion to kotlin ints`() {
-        assertThat(ZERO.toInteger(), equalTo(0))
-        assertThat(ONE.toInteger(), equalTo(1))
-        assertThat(TWO.toInteger(), equalTo(2))
-        assertThat(THREE.toInteger(), equalTo(3))
-        assertThat(FIVE.toInteger(), equalTo(5))
-        assertThat(FIFTEEN.toInteger(), equalTo(15))
-        assertThat(HUNDRED.toInteger(), equalTo(100))
-    }
-}
+fun NUMBER.toInteger(): Int = this({ x -> (x as Int) + 1 })(0) as Int
 
 
-val TRUE = { x: Any -> { y: Any -> x } }
-val FALSE = { x: Any -> { y: Any -> y } }
-val IF = { b: (Any) -> (Any) -> Any -> b }
-val IS_ZERO = { n: ((Any) -> Any) -> (Any) -> Any -> n({ x -> FALSE })(TRUE) as ((Any) -> (Any) -> Any) }
 
-fun ((Any) -> (Any) -> Any).toBoolean(): Boolean =
+typealias BOOL = (Any) -> (Any) -> Any
+
+val TRUE: BOOL = { x -> { y -> x } }
+val FALSE: BOOL = { x -> { y -> y } }
+val IF = { b: BOOL -> b }
+val IS_ZERO = { n: NUMBER -> n({ x -> FALSE })(TRUE) as BOOL }
+
+fun BOOL.toBoolean(): Boolean =
         // this(true)(false) as Boolean
         IF(this)(true)(false) as Boolean
 
-class BooleansTest {
-    @Test fun `conversion to kotlin booleans`() {
-        assertThat(TRUE.toBoolean(), equalTo(true))
-        assertThat(FALSE.toBoolean(), equalTo(false))
-    }
-
-    @Test fun `if function`() {
-        assertThat(IF(TRUE)("foo")("bar").toString(), equalTo("foo"))
-        assertThat(IF(FALSE)("foo")("bar").toString(), equalTo("bar"))
-    }
-
-    @Test fun `if zero predicate`() {
-        assertThat(IS_ZERO(ZERO).toBoolean(), equalTo(true))
-        assertThat(IS_ZERO(ONE).toBoolean(), equalTo(false))
-        assertThat(IS_ZERO(THREE).toBoolean(), equalTo(false))
-    }
-}
 
 
-val INCREMENT: (((Any) -> Any) -> (Any) -> Any) -> (((Any) -> Any) -> (Any) -> Any) = { n -> { p -> { x -> p(n(p)(x)) }}}
-//val DECREMENT: (((Any) -> Any) -> (Any) -> Any) -> (((Any) -> Any) -> (Any) -> Any) =
-//        { n -> { f -> { x -> n({ g -> { h -> { h(g(f))}}})({y -> {x}})({y-> {y}}) }}}
+typealias F = (Any) -> Any
+fun Any.asF() = this as F
 
-class NumericOperationsTest {
-    @Test fun `increment`() {
-        assertThat(INCREMENT(ZERO).toInteger(), equalTo(1))
-        assertThat(INCREMENT(ONE).toInteger(), equalTo(2))
-        assertThat(INCREMENT(TWO).toInteger(), equalTo(3))
-    }
-}
+val INCREMENT: (NUMBER) -> NUMBER = { n -> { p -> { x -> p(n(p)(x)) }}}
+val DECREMENT: (NUMBER) -> NUMBER =
+        { n -> { f -> { x ->
+            n({ g -> { h: F -> h(g.asF()(f)) }})({ y: Any -> x }).asF()({ y: Any -> y })
+        }}}
+val ADD: (NUMBER) -> (NUMBER) -> NUMBER = { m -> { n -> n(INCREMENT as F)(m) as NUMBER }}
+val SUBTRACT: (NUMBER) -> (NUMBER) -> NUMBER = { m -> { n -> n(DECREMENT as F)(m) as NUMBER }}
+val MULTIPLY: (NUMBER) -> (NUMBER) -> NUMBER = { m -> { n -> n(ADD(m) as F)(ZERO) as NUMBER }}
+val POWER: (NUMBER) -> (NUMBER) -> NUMBER = { m -> { n -> n(MULTIPLY(m) as F)(ONE) as NUMBER }}
+
