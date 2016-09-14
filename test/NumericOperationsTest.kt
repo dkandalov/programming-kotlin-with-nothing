@@ -13,9 +13,7 @@ class NumericOperationsTest {
     }
 
     @Test fun `decrement`() {
-        assertThat("negative numbers are not supported", DECREMENT(ZERO).toInteger(), equalTo(0))
-        assertThat("negative numbers edge case", INCREMENT(DECREMENT(ZERO)).toInteger(), equalTo(1))
-
+        assertThat(DECREMENT(ZERO).toInteger(), equalTo(0)) // no negative numbers
         assertThat(DECREMENT(ONE).toInteger(), equalTo(0))
         assertThat(DECREMENT(TWO).toInteger(), equalTo(1))
         assertThat(DECREMENT(THREE).toInteger(), equalTo(2))
@@ -49,5 +47,11 @@ class NumericOperationsTest {
         assertThat(POWER(ZERO)(ZERO).toInteger(), equalTo(1))
         assertThat(POWER(TWO)(THREE).toInteger(), equalTo(8))
         assertThat(POWER(THREE)(FIVE).toInteger(), equalTo(243))
+    }
+
+    @Test fun `less or equal`() {
+        assertThat(IS_LESS_OR_EQUAL(ONE)(TWO).toBoolean(), equalTo(true))
+        assertThat(IS_LESS_OR_EQUAL(TWO)(TWO).toBoolean(), equalTo(true))
+        assertThat(IS_LESS_OR_EQUAL(THREE)(TWO).toBoolean(), equalTo(false))
     }
 }

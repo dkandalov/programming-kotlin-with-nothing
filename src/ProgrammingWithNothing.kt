@@ -51,3 +51,4 @@ val SUBTRACT: (NUMBER) -> (NUMBER) -> NUMBER = { m -> { n -> n(DECREMENT as F)(m
 val MULTIPLY: (NUMBER) -> (NUMBER) -> NUMBER = { m -> { n -> n(ADD(m) as F)(ZERO) as NUMBER }}
 val POWER: (NUMBER) -> (NUMBER) -> NUMBER = { m -> { n -> n(MULTIPLY(m) as F)(ONE) as NUMBER }}
 
+val IS_LESS_OR_EQUAL: (NUMBER) -> (NUMBER) -> BOOL = { m -> { n -> IS_ZERO(SUBTRACT(m)(n)) }}
