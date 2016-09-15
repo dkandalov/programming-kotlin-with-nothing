@@ -54,4 +54,9 @@ class NumericOperationsTest {
         assertThat(IS_LESS_OR_EQUAL(TWO)(TWO).toBoolean(), equalTo(true))
         assertThat(IS_LESS_OR_EQUAL(THREE)(TWO).toBoolean(), equalTo(false))
     }
+
+    @Test fun `mod`() {
+        assertThat(MOD(THREE)(TWO).toInteger(), equalTo(1))
+        assertThat(MOD(POWER(THREE)(THREE))(ADD(THREE)(TWO)).toInteger(), equalTo(1))
+    }
 }

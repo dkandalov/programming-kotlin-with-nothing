@@ -50,5 +50,16 @@ val ADD: (NUMBER) -> (NUMBER) -> NUMBER = { m -> { n -> n(INCREMENT as F)(m) as 
 val SUBTRACT: (NUMBER) -> (NUMBER) -> NUMBER = { m -> { n -> n(DECREMENT as F)(m) as NUMBER }}
 val MULTIPLY: (NUMBER) -> (NUMBER) -> NUMBER = { m -> { n -> n(ADD(m) as F)(ZERO) as NUMBER }}
 val POWER: (NUMBER) -> (NUMBER) -> NUMBER = { m -> { n -> n(MULTIPLY(m) as F)(ONE) as NUMBER }}
-
 val IS_LESS_OR_EQUAL: (NUMBER) -> (NUMBER) -> BOOL = { m -> { n -> IS_ZERO(SUBTRACT(m)(n)) }}
+
+val Z = { f: F -> { x: F -> f({ y: Any -> x(x as Any).asF()(y) }) }({ x: Any -> f({ y: Any -> x.asF()(x).asF()(y) }) }) }
+
+val MOD: (NUMBER) -> (NUMBER) -> NUMBER = Z({ f -> { m: NUMBER -> { n: NUMBER ->
+    IF(IS_LESS_OR_EQUAL(n)(m))(
+        { x: Any ->
+            f.asF()(SUBTRACT(m)(n)).asF()(n)
+        }
+    )(
+        m
+    )
+}}}) as ((NUMBER) -> (NUMBER) -> NUMBER)
