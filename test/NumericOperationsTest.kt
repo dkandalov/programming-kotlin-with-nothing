@@ -57,6 +57,51 @@ class NumericOperationsTest {
 
     @Test fun `mod`() {
         assertThat(MOD(THREE)(TWO).toInteger(), equalTo(1))
-        assertThat(MOD(POWER(THREE)(THREE))(ADD(THREE)(TWO)).toInteger(), equalTo(1))
+        assertThat(MOD(POWER(THREE)(THREE))(ADD(THREE)(TWO)).toInteger(), equalTo(2))
+    }
+
+    @Test fun `pairs`() {
+        val pair = PAIR(THREE)(FIVE)
+        assertThat(LEFT(pair).toInteger(), equalTo(3))
+        assertThat(RIGHT(pair).toInteger(), equalTo(5))
+    }
+
+    @Test fun `lists`() {
+        val list =
+            UNSHIFT(
+                UNSHIFT(
+                    UNSHIFT(EMPTY)(THREE)
+                )(TWO)
+            )(ONE)
+
+        assertThat(FIRST(list).toInteger(), equalTo(1))
+        assertThat(FIRST(REST(list)).toInteger(), equalTo(2))
+        assertThat(FIRST(REST(REST(list))).toInteger(), equalTo(3))
+
+        assertThat(IS_EMPTY(list).toBoolean(), equalTo(false))
+        assertThat(IS_EMPTY(EMPTY).toBoolean(), equalTo(true))
+
+        assertThat(list.toList().map{ it.toInteger() }, equalTo(listOf(1, 2, 3)))
+    }
+
+    @Test fun `range`() {
+        assertThat(RANGE(ONE)(FIVE).toList().map { it.toInteger() }, equalTo(listOf(1, 2, 3, 4, 5)))
+    }
+
+    @Test fun `fold`() {
+        assertThat(FOLD(RANGE(ONE)(FIVE))(ZERO)(ADD).toInteger(), equalTo(15))
+        assertThat(FOLD(RANGE(ONE)(FIVE))(ONE)(MULTIPLY).toInteger(), equalTo(120))
+    }
+
+    @Test fun `map`() {
+        assertThat(
+            MAP(RANGE(ONE)(FIVE))(INCREMENT).toList().map { it.toInteger() },
+            equalTo(listOf(2, 3, 4, 5, 6))
+        )
+    }
+
+    @Test fun `chars and strings`() {
+        assertThat(ZED.toChar(), equalTo('z'))
+        assertThat(FIZZBUZZ.toString_(), equalTo("FizzBuzz"))
     }
 }
