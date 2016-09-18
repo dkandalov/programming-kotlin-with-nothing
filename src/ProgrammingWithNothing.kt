@@ -8,7 +8,9 @@ typealias L = (Any) -> Any
 typealias LL = (Any) -> ((Any) -> Any)
 typealias LLL = (Any) -> ((Any) -> ((Any) -> Any))
 fun _L(any: Any): L = any as L
-fun Any.L() = _L(this)
+fun <T> Any.L(any: Any): T = _L(this)(any) as T
+fun Any.LL(any: Any): LL = _L(this)(any) as LL
+fun Any.LLL(any: Any): LLL = _L(this)(any) as LLL
 
 typealias NUMBER = (L) -> (Any) -> Any
 typealias BOOL = (Any) -> (Any) -> Any
@@ -30,7 +32,7 @@ val HUNDRED: NUMBER = { p -> { x ->
     ))))))))))))))))))
 }}
 
-fun Any.toInt(): Int = this.L()({ x: Any -> (x as Int) + 1 }).L()(0) as Int
+fun Any.toInt(): Int = this.LL({ x: Any -> (x as Int) + 1 })(0) as Int
 
 
 val TRUE: BOOL = { x -> { y -> x } }
@@ -46,7 +48,7 @@ fun Any.toBoolean(): Boolean =
 val INCREMENT: (NUMBER) -> NUMBER = { n -> { p -> { x -> p(n(p)(x)) }}}
 val DECREMENT: (NUMBER) -> NUMBER =
         { n -> { f -> { x ->
-            n({ g -> { h: L -> h(g.L()(f)) }})({ y: Any -> x }).L()({ y: Any -> y })
+            n({ g -> { h: L -> h(g.L(f)) }})({ y: Any -> x }).L({ y: Any -> y })
         }}}
 val ADD: (NUMBER) -> (NUMBER) -> NUMBER = { m -> { n -> n(_L(INCREMENT))(m) as NUMBER }}
 val SUBTRACT: (NUMBER) -> (NUMBER) -> NUMBER = { m -> { n -> n(_L(DECREMENT))(m) as NUMBER }}
@@ -54,20 +56,20 @@ val MULTIPLY: (NUMBER) -> (NUMBER) -> NUMBER = { m -> { n -> n(_L(ADD(m)))(ZERO)
 val POWER: (NUMBER) -> (NUMBER) -> NUMBER = { m -> { n -> n(_L(MULTIPLY(m)))(ONE) as NUMBER }}
 val IS_LESS_OR_EQUAL: (NUMBER) -> (NUMBER) -> BOOL = { m -> { n -> IS_ZERO(SUBTRACT(m)(n)) }}
 
-val Z = { f: L -> { x: L -> f({ y: Any -> x.L()(x).L()(y) }) }({ x: Any -> f({ y: Any -> x.L()(x).L()(y) }) }) }
+val Z = { f: L -> { x: L -> f({ y: Any -> x.LL(x)(y) }) }({ x: Any -> f({ y: Any -> x.LL(x)(y) }) }) }
 
 val MOD: (NUMBER) -> (NUMBER) -> NUMBER =
     Z({ f -> { m: NUMBER -> { n: NUMBER ->
         IF(IS_LESS_OR_EQUAL(n)(m))(
             { x: Any ->
-                f.L()(SUBTRACT(m)(n)).L()(n).L()(x)
+                f.LLL(SUBTRACT(m)(n))(n)(x)
             }
         )(
             m
         )
     }}}) as ((NUMBER) -> (NUMBER) -> NUMBER)
 
-val PAIR: (Any) -> (Any) -> LL = { x: Any -> { y: Any -> { f -> f.L()(x).L()(y).L() }}}
+val PAIR: (Any) -> (Any) -> LL = { x: Any -> { y: Any -> { f -> f.LLL(x)(y) }}}
 val LEFT = { p: LL -> p(TRUE) }
 val RIGHT = { p: LL -> p(FALSE) }
 
@@ -93,7 +95,7 @@ val RANGE = Z({ f: Any ->
     { m: NUMBER -> { n: NUMBER ->
         IF(IS_LESS_OR_EQUAL(m)(n))(
             { x: Any ->
-                UNSHIFT(f.L()(INCREMENT(m)).L()(n))(m)(x)
+                UNSHIFT(f.LL(INCREMENT(m))(n))(m)(x)
             }
         )(
             EMPTY
@@ -107,7 +109,7 @@ val FOLD = Z({ f ->
             x
         )(
             { y: Any ->
-                g(f.L()(REST(l)).L()(x).L()(g))(FIRST(l))(y)
+                g(f.LLL(REST(l))(x)(g))(FIRST(l))(y)
             }
         )
     }}}
@@ -115,7 +117,7 @@ val FOLD = Z({ f ->
 
 val MAP = { k: Any -> { f: Any ->
     FOLD(k)(EMPTY)(
-        { l: L -> { x: Any -> UNSHIFT(l)(f.L()(x)) }}
+        { l: L -> { x: Any -> UNSHIFT(l)(f.L(x)) }}
     )
 }}
 
@@ -137,7 +139,7 @@ fun Any.toString_(): String = this.toList().map{ it.toChar() }.joinToString("")
 val DIV = Z({ f: Any -> { m: NUMBER -> { n: NUMBER ->
     IF(IS_LESS_OR_EQUAL(n)(m))(
         { x: Any ->
-            INCREMENT(f.L()(SUBTRACT(m)(n)).L()(n) as NUMBER).L()(x)
+            INCREMENT(f.LL(SUBTRACT(m)(n))(n) as NUMBER).L<Any>(x)
         }
     )(
         ZERO
@@ -153,7 +155,7 @@ val TO_DIGITS = _L(Z({ f -> { n: NUMBER -> PUSH(
             EMPTY
         )(
             { x:Any ->
-                f.L()(DIV(n)(TEN)).L()(x)
+                f.LL(DIV(n)(TEN))(x)
             }
         )
     )(
