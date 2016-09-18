@@ -4,20 +4,14 @@ import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
 import org.junit.Test
 
-typealias _F = (Any) -> Any
-typealias FF = (Any) -> ((Any) -> Any)
-typealias FFF = (Any) -> ((Any) -> ((Any) -> Any))
+typealias L = (Any) -> Any
+typealias LL = (Any) -> ((Any) -> Any)
+typealias LLL = (Any) -> ((Any) -> ((Any) -> Any))
+fun _L(any: Any): L = any as L
+fun Any.L() = _L(this)
 
-typealias NUMBER = (_F) -> (Any) -> Any
+typealias NUMBER = (L) -> (Any) -> Any
 typealias BOOL = (Any) -> (Any) -> Any
-
-fun Any.toInt(): Int = this.asF()({ x: Any -> (x as Int) + 1 }).asF()(0) as Int
-fun Any.toBoolean(): Boolean =
-        // this(true)(false) as Boolean
-        IF(this as (Any) -> (Any) -> Any)(true)(false) as Boolean
-fun L(any: Any): _F = any as _F
-fun Any.asF() = L(this)
-
 
 val ZERO: NUMBER = { p -> { x -> x } }
 val ONE: NUMBER = { p -> { x -> p(x) } }
@@ -36,55 +30,61 @@ val HUNDRED: NUMBER = { p -> { x ->
     ))))))))))))))))))
 }}
 
+fun Any.toInt(): Int = this.L()({ x: Any -> (x as Int) + 1 }).L()(0) as Int
+
 
 val TRUE: BOOL = { x -> { y -> x } }
 val FALSE: BOOL = { x -> { y -> y } }
 val IF: (BOOL) -> BOOL = { b -> b }
 val IS_ZERO: (NUMBER) -> BOOL = { n -> n({ x -> FALSE })(TRUE) as BOOL }
 
+fun Any.toBoolean(): Boolean =
+        // this(true)(false) as Boolean
+        IF(this as (Any) -> (Any) -> Any)(true)(false) as Boolean
+
 
 val INCREMENT: (NUMBER) -> NUMBER = { n -> { p -> { x -> p(n(p)(x)) }}}
 val DECREMENT: (NUMBER) -> NUMBER =
         { n -> { f -> { x ->
-            n({ g -> { h: _F -> h(g.asF()(f)) }})({ y: Any -> x }).asF()({ y: Any -> y })
+            n({ g -> { h: L -> h(g.L()(f)) }})({ y: Any -> x }).L()({ y: Any -> y })
         }}}
-val ADD: (NUMBER) -> (NUMBER) -> NUMBER = { m -> { n -> n(L(INCREMENT))(m) as NUMBER }}
-val SUBTRACT: (NUMBER) -> (NUMBER) -> NUMBER = { m -> { n -> n(L(DECREMENT))(m) as NUMBER }}
-val MULTIPLY: (NUMBER) -> (NUMBER) -> NUMBER = { m -> { n -> n(L(ADD(m)))(ZERO) as NUMBER }}
-val POWER: (NUMBER) -> (NUMBER) -> NUMBER = { m -> { n -> n(L(MULTIPLY(m)))(ONE) as NUMBER }}
+val ADD: (NUMBER) -> (NUMBER) -> NUMBER = { m -> { n -> n(_L(INCREMENT))(m) as NUMBER }}
+val SUBTRACT: (NUMBER) -> (NUMBER) -> NUMBER = { m -> { n -> n(_L(DECREMENT))(m) as NUMBER }}
+val MULTIPLY: (NUMBER) -> (NUMBER) -> NUMBER = { m -> { n -> n(_L(ADD(m)))(ZERO) as NUMBER }}
+val POWER: (NUMBER) -> (NUMBER) -> NUMBER = { m -> { n -> n(_L(MULTIPLY(m)))(ONE) as NUMBER }}
 val IS_LESS_OR_EQUAL: (NUMBER) -> (NUMBER) -> BOOL = { m -> { n -> IS_ZERO(SUBTRACT(m)(n)) }}
 
-val Z = { f: _F -> { x: _F -> f({ y: Any -> x.asF()(x).asF()(y) }) }({ x: Any -> f({ y: Any -> x.asF()(x).asF()(y) }) }) }
+val Z = { f: L -> { x: L -> f({ y: Any -> x.L()(x).L()(y) }) }({ x: Any -> f({ y: Any -> x.L()(x).L()(y) }) }) }
 
 val MOD: (NUMBER) -> (NUMBER) -> NUMBER =
     Z({ f -> { m: NUMBER -> { n: NUMBER ->
         IF(IS_LESS_OR_EQUAL(n)(m))(
             { x: Any ->
-                f.asF()(SUBTRACT(m)(n)).asF()(n).asF()(x)
+                f.L()(SUBTRACT(m)(n)).L()(n).L()(x)
             }
         )(
             m
         )
     }}}) as ((NUMBER) -> (NUMBER) -> NUMBER)
 
-val PAIR: (Any) -> (Any) -> FF = { x: Any -> { y: Any -> { f -> f.asF()(x).asF()(y).asF() }}}
-val LEFT = { p: FF -> p(TRUE) }
-val RIGHT = { p: FF -> p(FALSE) }
+val PAIR: (Any) -> (Any) -> LL = { x: Any -> { y: Any -> { f -> f.L()(x).L()(y).L() }}}
+val LEFT = { p: LL -> p(TRUE) }
+val RIGHT = { p: LL -> p(FALSE) }
 
 val EMPTY = PAIR(TRUE)(TRUE)
 val UNSHIFT = { l: Any -> { x: Any ->
     PAIR(FALSE)(PAIR(x)(l))
 }}
-val IS_EMPTY = LEFT as ((FF) -> BOOL)
-val FIRST = { l: Any -> LEFT(RIGHT(l as FF) as FF) }
-val REST = { l: Any -> RIGHT(RIGHT(l as FF) as FF) }
+val IS_EMPTY = LEFT as ((LL) -> BOOL)
+val FIRST = { l: Any -> LEFT(RIGHT(l as LL) as LL) }
+val REST = { l: Any -> RIGHT(RIGHT(l as LL) as LL) }
 
 fun Any.toList(): List<Any> {
-    var list = this as FF
+    var list = this as LL
     val result = mutableListOf<Any>()
     while (!IS_EMPTY(list).toBoolean()) {
         result.add(FIRST(list))
-        list = REST(list) as FF
+        list = REST(list) as LL
     }
     return result
 }
@@ -93,29 +93,29 @@ val RANGE = Z({ f: Any ->
     { m: NUMBER -> { n: NUMBER ->
         IF(IS_LESS_OR_EQUAL(m)(n))(
             { x: Any ->
-                UNSHIFT(f.asF()(INCREMENT(m)).asF()(n))(m)(x)
+                UNSHIFT(f.L()(INCREMENT(m)).L()(n))(m)(x)
             }
         )(
             EMPTY
         )
     }}
-}) as FF
+}) as LL
 
 val FOLD = Z({ f ->
-    { l: FF -> { x: Any -> { g: FFF ->
+    { l: LL -> { x: Any -> { g: LLL ->
         IF(IS_EMPTY(l))(
             x
         )(
             { y: Any ->
-                g(f.asF()(REST(l)).asF()(x).asF()(g))(FIRST(l))(y)
+                g(f.L()(REST(l)).L()(x).L()(g))(FIRST(l))(y)
             }
         )
     }}}
-}) as FFF
+}) as LLL
 
 val MAP = { k: Any -> { f: Any ->
     FOLD(k)(EMPTY)(
-        { l: _F -> { x: Any -> UNSHIFT(l)(f.asF()(x)) }}
+        { l: L -> { x: Any -> UNSHIFT(l)(f.L()(x)) }}
     )
 }}
 
@@ -134,27 +134,26 @@ val FIZZBUZZ = UNSHIFT(UNSHIFT(UNSHIFT(UNSHIFT(BUZZ)(ZED))(ZED))(I))(F)
 fun Any.toChar(): Char = "0123456789BFiuz"[this.toInt()]
 fun Any.toString_(): String = this.toList().map{ it.toChar() }.joinToString("")
 
-
 val DIV = Z({ f: Any -> { m: NUMBER -> { n: NUMBER ->
     IF(IS_LESS_OR_EQUAL(n)(m))(
         { x: Any ->
-            INCREMENT(f.asF()(SUBTRACT(m)(n)).asF()(n) as NUMBER).asF()(x)
+            INCREMENT(f.L()(SUBTRACT(m)(n)).L()(n) as NUMBER).L()(x)
         }
     )(
         ZERO
     )
-}}}) as FF
+}}}) as LL
 
 val PUSH = { l: Any -> { x: Any ->
     FOLD(l)(UNSHIFT(EMPTY)(x))(UNSHIFT)
 }}
 
-val TO_DIGITS = L(Z({ f -> { n: NUMBER -> PUSH(
+val TO_DIGITS = _L(Z({ f -> { n: NUMBER -> PUSH(
         IF(IS_LESS_OR_EQUAL(n)(DECREMENT(TEN)))(
             EMPTY
         )(
             { x:Any ->
-                f.asF()(DIV(n)(TEN)).asF()(x)
+                f.L()(DIV(n)(TEN)).L()(x)
             }
         )
     )(
@@ -162,7 +161,7 @@ val TO_DIGITS = L(Z({ f -> { n: NUMBER -> PUSH(
     )
 }}))
 
-val FIZZ__BUZZ = MAP(RANGE(ONE)(HUNDRED))({ n: NUMBER ->
+val LIST_OF_FIZZ_BUZZ = MAP(RANGE(ONE)(HUNDRED))({ n: NUMBER ->
     IF(IS_ZERO(MOD(n)(FIFTEEN)))(
         FIZZBUZZ
     )(IF(IS_ZERO(MOD(n)(THREE)))(
