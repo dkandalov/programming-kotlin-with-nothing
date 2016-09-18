@@ -1,8 +1,23 @@
+@file:Suppress("UNCHECKED_CAST")
+
 import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
 import org.junit.Test
 
-typealias NUMBER = ((Any) -> Any) -> (Any) -> Any
+typealias _F = (Any) -> Any
+typealias FF = (Any) -> ((Any) -> Any)
+typealias FFF = (Any) -> ((Any) -> ((Any) -> Any))
+
+typealias NUMBER = (_F) -> (Any) -> Any
+typealias BOOL = (Any) -> (Any) -> Any
+
+fun Any.toInt(): Int = this.asF()({ x: Any -> (x as Int) + 1 }).asF()(0) as Int
+fun Any.toBoolean(): Boolean =
+        // this(true)(false) as Boolean
+        IF(this as (Any) -> (Any) -> Any)(true)(false) as Boolean
+fun L(any: Any): _F = any as _F
+fun Any.asF() = L(this)
+
 
 val ZERO: NUMBER = { p -> { x -> x } }
 val ONE: NUMBER = { p -> { x -> p(x) } }
@@ -21,37 +36,22 @@ val HUNDRED: NUMBER = { p -> { x ->
     ))))))))))))))))))
 }}
 
-fun Any.toInt(): Int = this.asF()({ x: Any -> (x as Int) + 1 }).asF()(0) as Int
-
-
-
-typealias BOOL = (Any) -> (Any) -> Any
 
 val TRUE: BOOL = { x -> { y -> x } }
 val FALSE: BOOL = { x -> { y -> y } }
-val IF = { b: BOOL -> b }
-val IS_ZERO = { n: NUMBER -> n({ x -> FALSE })(TRUE) as BOOL }
+val IF: (BOOL) -> BOOL = { b -> b }
+val IS_ZERO: (NUMBER) -> BOOL = { n -> n({ x -> FALSE })(TRUE) as BOOL }
 
-fun Any.toBoolean(): Boolean =
-        // this(true)(false) as Boolean
-        IF(this as (Any) -> (Any) -> Any)(true)(false) as Boolean
-
-
-
-typealias _F = (Any) -> Any
-typealias FF = (Any) -> ((Any) -> Any)
-typealias FFF = (Any) -> ((Any) -> ((Any) -> Any))
-fun Any.asF() = this as _F
 
 val INCREMENT: (NUMBER) -> NUMBER = { n -> { p -> { x -> p(n(p)(x)) }}}
 val DECREMENT: (NUMBER) -> NUMBER =
         { n -> { f -> { x ->
             n({ g -> { h: _F -> h(g.asF()(f)) }})({ y: Any -> x }).asF()({ y: Any -> y })
         }}}
-val ADD: (NUMBER) -> (NUMBER) -> NUMBER = { m -> { n -> n(INCREMENT as _F)(m) as NUMBER }}
-val SUBTRACT: (NUMBER) -> (NUMBER) -> NUMBER = { m -> { n -> n(DECREMENT as _F)(m) as NUMBER }}
-val MULTIPLY: (NUMBER) -> (NUMBER) -> NUMBER = { m -> { n -> n(ADD(m) as _F)(ZERO) as NUMBER }}
-val POWER: (NUMBER) -> (NUMBER) -> NUMBER = { m -> { n -> n(MULTIPLY(m) as _F)(ONE) as NUMBER }}
+val ADD: (NUMBER) -> (NUMBER) -> NUMBER = { m -> { n -> n(L(INCREMENT))(m) as NUMBER }}
+val SUBTRACT: (NUMBER) -> (NUMBER) -> NUMBER = { m -> { n -> n(L(DECREMENT))(m) as NUMBER }}
+val MULTIPLY: (NUMBER) -> (NUMBER) -> NUMBER = { m -> { n -> n(L(ADD(m)))(ZERO) as NUMBER }}
+val POWER: (NUMBER) -> (NUMBER) -> NUMBER = { m -> { n -> n(L(MULTIPLY(m)))(ONE) as NUMBER }}
 val IS_LESS_OR_EQUAL: (NUMBER) -> (NUMBER) -> BOOL = { m -> { n -> IS_ZERO(SUBTRACT(m)(n)) }}
 
 val Z = { f: _F -> { x: _F -> f({ y: Any -> x.asF()(x).asF()(y) }) }({ x: Any -> f({ y: Any -> x.asF()(x).asF()(y) }) }) }
@@ -149,7 +149,7 @@ val PUSH = { l: Any -> { x: Any ->
     FOLD(l)(UNSHIFT(EMPTY)(x))(UNSHIFT)
 }}
 
-val TO_DIGITS = Z({ f -> { n: NUMBER -> PUSH(
+val TO_DIGITS = L(Z({ f -> { n: NUMBER -> PUSH(
         IF(IS_LESS_OR_EQUAL(n)(DECREMENT(TEN)))(
             EMPTY
         )(
@@ -160,7 +160,7 @@ val TO_DIGITS = Z({ f -> { n: NUMBER -> PUSH(
     )(
         MOD(n)(TEN)
     )
-}}) as _F
+}}))
 
 val FIZZ__BUZZ = MAP(RANGE(ONE)(HUNDRED))({ n: NUMBER ->
     IF(IS_ZERO(MOD(n)(FIFTEEN)))(

@@ -143,4 +143,9 @@ class ProgrammingWithNothingTest {
         assertThat(TO_DIGITS(FIVE).toString_(), equalTo("5"))
         assertThat(TO_DIGITS(POWER(FIVE)(THREE)).toString_(), equalTo("125"))
     }
+
+    @Test fun `llll`() {
+//        l.aa(null)
+//        l.aa(DIV)
+    }
 }
