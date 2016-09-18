@@ -82,6 +82,8 @@ class NumericOperationsTest {
         assertThat(IS_EMPTY(EMPTY).toBoolean(), equalTo(true))
 
         assertThat(list.toList().map{ it.toInteger() }, equalTo(listOf(1, 2, 3)))
+
+        assertThat(PUSH(list)(FIVE).toList().map{ it.toInteger() }, equalTo(listOf(1, 2, 3, 5)))
     }
 
     @Test fun `range`() {
@@ -103,5 +105,16 @@ class NumericOperationsTest {
     @Test fun `chars and strings`() {
         assertThat(ZED.toChar(), equalTo('z'))
         assertThat(FIZZBUZZ.toString_(), equalTo("FizzBuzz"))
+    }
+
+    @Test fun `division`() {
+        assertThat(DIV(ONE)(ONE).toInteger(), equalTo(1))
+        assertThat(DIV(TEN)(TWO).toInteger(), equalTo(5))
+        assertThat(DIV(TEN)(THREE).toInteger(), equalTo(3))
+    }
+
+    @Test fun `to digits`() {
+        assertThat(TO_DIGITS(FIVE).toString_(), equalTo("5"))
+        assertThat(TO_DIGITS(POWER(FIVE)(THREE)).toString_(), equalTo("125"))
     }
 }
