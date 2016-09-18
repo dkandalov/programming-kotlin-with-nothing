@@ -2,7 +2,33 @@ import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
 import org.junit.Test
 
-class NumericOperationsTest {
+class ProgrammingWithNothingTest {
+    @Test fun `conversion to kotlin ints`() {
+        assertThat(ZERO.toInt(), equalTo(0))
+        assertThat(ONE.toInt(), equalTo(1))
+        assertThat(TWO.toInt(), equalTo(2))
+        assertThat(THREE.toInt(), equalTo(3))
+        assertThat(FIVE.toInt(), equalTo(5))
+        assertThat(FIFTEEN.toInt(), equalTo(15))
+        assertThat(HUNDRED.toInt(), equalTo(100))
+    }
+
+    @Test fun `conversion to kotlin booleans`() {
+        assertThat(TRUE.toBoolean(), equalTo(true))
+        assertThat(FALSE.toBoolean(), equalTo(false))
+    }
+
+    @Test fun `if function`() {
+        assertThat(IF(TRUE)("foo")("bar").toString(), equalTo("foo"))
+        assertThat(IF(FALSE)("foo")("bar").toString(), equalTo("bar"))
+    }
+
+    @Test fun `is zero predicate`() {
+        assertThat(IS_ZERO(ZERO).toBoolean(), equalTo(true))
+        assertThat(IS_ZERO(ONE).toBoolean(), equalTo(false))
+        assertThat(IS_ZERO(THREE).toBoolean(), equalTo(false))
+    }
+
     @Test fun `increment`() {
         assertThat(INCREMENT(ZERO).toInt(), equalTo(1))
         assertThat(INCREMENT(ONE).toInt(), equalTo(2))
