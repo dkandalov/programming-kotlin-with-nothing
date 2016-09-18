@@ -130,7 +130,7 @@ class ProgrammingWithNothingTest {
 
     @Test fun `chars and strings`() {
         assertThat(ZED.toChar(), equalTo('z'))
-        assertThat(FIZZBUZZ.toString_(), equalTo("FizzBuzz"))
+        assertThat(FIZZBUZZ.toStr(), equalTo("FizzBuzz"))
     }
 
     @Test fun `division`() {
@@ -140,13 +140,13 @@ class ProgrammingWithNothingTest {
     }
 
     @Test fun `to digits`() {
-        assertThat(TO_DIGITS(FIVE).toString_(), equalTo("5"))
-        assertThat(TO_DIGITS(POWER(FIVE)(THREE)).toString_(), equalTo("125"))
+        assertThat(TO_DIGITS(FIVE).toStr(), equalTo("5"))
+        assertThat(TO_DIGITS(POWER(FIVE)(THREE)).toStr(), equalTo("125"))
     }
 
     @Test fun `fizz buzz`() {
         assertThat(
-            LIST_OF_FIZZ_BUZZ.toList().map{ it.toString_() }.joinToString(", "),
+            LIST_OF_FIZZ_BUZZ.toList().map{ it.toStr() }.joinToString(", "),
             equalTo("1, 2, Fizz, 4, 5, Fizz, 7, 8, Fizz, 10, 11, Fizz, 13, 14, FizzBuzz, " +
                     "16, 17, Fizz, 19, 20, Fizz, 22, 23, Fizz, 25, 26, Fizz, 28, 29, FizzBuzz, " +
                     "31, 32, Fizz, 34, 35, Fizz, 37, 38, Fizz, 40, 41, Fizz, 43, 44, FizzBuzz, " +
