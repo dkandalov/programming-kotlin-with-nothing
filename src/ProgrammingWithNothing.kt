@@ -21,8 +21,7 @@ val HUNDRED: NUMBER = { p -> { x ->
     ))))))))))))))))))
 }}
 
-fun NUMBER.toInteger(): Int = this({ x -> (x as Int) + 1 })(0) as Int
-fun Any.toInteger(): Int = this.asF()({ x: Any -> (x as Int) + 1 }).asF()(0) as Int
+fun Any.toInt(): Int = this.asF()({ x: Any -> (x as Int) + 1 }).asF()(0) as Int
 
 
 
@@ -132,7 +131,7 @@ val FIZZ = UNSHIFT(UNSHIFT(UNSHIFT(UNSHIFT(EMPTY)(ZED))(ZED))(I))(F)
 val BUZZ = UNSHIFT(UNSHIFT(UNSHIFT(UNSHIFT(EMPTY)(ZED))(ZED))(U))(B)
 val FIZZBUZZ = UNSHIFT(UNSHIFT(UNSHIFT(UNSHIFT(BUZZ)(ZED))(ZED))(I))(F)
 
-fun Any.toChar(): Char = "0123456789BFiuz"[this.toInteger()]
+fun Any.toChar(): Char = "0123456789BFiuz"[this.toInt()]
 fun Any.toString_(): String = this.toList().map{ it.toChar() }.joinToString("")
 
 
