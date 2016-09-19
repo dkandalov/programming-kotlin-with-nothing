@@ -1,12 +1,10 @@
 @file:Suppress("UNCHECKED_CAST")
 
-import com.natpryce.hamkrest.assertion.assertThat
-import com.natpryce.hamkrest.equalTo
 import org.junit.Test
 
 typealias λ = (Any) -> Any
-typealias λλ = (Any) -> ((Any) -> Any)
-typealias λλλ = (Any) -> ((Any) -> ((Any) -> Any))
+typealias λλ = (Any) -> (Any) -> Any
+typealias λλλ = (Any) -> (Any) -> (Any) -> Any
 fun _λ(any: Any) = any as λ
 fun <T> Any.λ(any: Any) = _λ(this)(any) as T
 fun Any.λλ(any: Any) = _λ(this)(any) as λλ
@@ -43,7 +41,7 @@ val IS_ZERO: (NUMBER) -> BOOL = { n -> n({ x -> FALSE })(TRUE) as BOOL }
 
 fun Any.toBoolean() =
         // this(true)(false) as Boolean
-        IF(this as (Any) -> (Any) -> Any)(true)(false) as Boolean
+        IF(this as BOOL)(true)(false) as Boolean
 
 
 val INCREMENT: (NUMBER) -> NUMBER = { n -> { p -> { x -> p(n(p)(x)) }}}
