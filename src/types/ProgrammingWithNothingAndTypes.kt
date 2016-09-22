@@ -8,6 +8,7 @@ import org.junit.Test
 typealias L<T> = (T) -> T
 typealias LL<T> = L<L<T>>
 typealias LLL<T> = L<L<L<T>>>
+typealias LLLL<T> = L<L<L<L<T>>>>
 typealias N<T> = ((T) -> T) -> (T) -> T
 typealias NN<T> = N<N<T>>
 //typealias N2<T,U> = ((T) -> U) -> (T) -> U
@@ -30,13 +31,11 @@ fun B<Boolean>.toKotlin(): Boolean = this(true)(false)
 
 
 fun <T> increment(): (N<T>) -> N<T> = { n -> { p -> { x -> p(n(p)(x)) }}}
-//fun <T> decrement(): (N<L<T>>) -> N<T> =
-//        { n -> { f: L<T> -> { x: T ->
-//            val xl = { y:T -> x }
-//            val yl = { y:T -> y }
-//            val function/*: L<T> */= { g: LL<T> -> { h: LLL<T> -> h(g(f)) } }
-//            n(function)(xl)(yl)
-//        }}}
+fun <T> decrement(): (N<(L<T>)->T>) -> N<T> =
+        { n -> { f: L<T> -> { x: T ->
+            val function: L<(L<T>) -> T> = { g -> { h -> h(g(f)) } }
+            n(function)({ y -> x })({ y: T -> y })
+        }}}
 fun <T> add(): (NN<T>) -> (N<T>) -> N<T> = { n -> { m -> n(increment<T>())(m) }}
 //fun <T> subtract(): (N<T>) -> (N<T>) -> N<T> = { m -> { n -> n(decrement<T>())(m) }}
 fun <T> multiply(): (NN<T>) -> (NN<T>) -> N<T> = { n -> { m ->

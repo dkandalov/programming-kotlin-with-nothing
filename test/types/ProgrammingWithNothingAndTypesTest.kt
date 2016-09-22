@@ -1,9 +1,11 @@
 package types
 
+import DECREMENT
 import FIVE
 import MULTIPLY
 import ONE
 import THREE
+import TWO
 import ZERO
 import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
@@ -42,6 +44,15 @@ class ProgrammingWithNothingAndTypesTest {
         assertThat(increment<Int>()(three()).toKotlin(), equalTo(4))
 
         assertThat(increment<Int>()(increment<Int>()(zero())).toKotlin(), equalTo(2))
+    }
+
+    @Test fun `decrement`() {
+        assertThat(decrement<Int>()(zero()).toKotlin(), equalTo(0)) // no negative numbers
+        assertThat(decrement<Int>()(one()).toKotlin(), equalTo(0))
+        assertThat(decrement<Int>()(two()).toKotlin(), equalTo(1))
+        assertThat(decrement<Int>()(three()).toKotlin(), equalTo(2))
+
+        assertThat(decrement<Int>()(decrement<(L<Int>)->Int>()(three())).toKotlin(), equalTo(1))
     }
 
     @Test fun `addition`() {
