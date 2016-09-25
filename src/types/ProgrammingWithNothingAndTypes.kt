@@ -1,5 +1,3 @@
-@file:Suppress("UNCHECKED_CAST")
-
 package types
 
 import org.junit.Test
@@ -11,7 +9,6 @@ typealias LLL<T> = L<L<L<T>>>
 typealias LLLL<T> = L<L<L<L<T>>>>
 typealias N<T> = ((T) -> T) -> (T) -> T
 typealias NN<T> = N<N<T>>
-//typealias N2<T,U> = ((T) -> U) -> (T) -> U
 
 fun <T> zero(): N<T> = { p -> { x -> x }}
 fun <T> one(): N<T> = { p -> { x -> p(x) }}
@@ -37,7 +34,7 @@ fun <T> decrement(): (N<(L<T>)->T>) -> N<T> =
             n(function)({ y -> x })({ y: T -> y })
         }}}
 fun <T> add(): (NN<T>) -> (N<T>) -> N<T> = { n -> { m -> n(increment<T>())(m) }}
-//fun <T> subtract(): (N<T>) -> (N<T>) -> N<T> = { m -> { n -> n(decrement<T>())(m) }}
+//fun <T> subtract(): (N<T>) -> (N<T>) -> N<T> = { m -> { n -> n(decrement())(m) }}
 fun <T> multiply(): (NN<T>) -> (NN<T>) -> N<T> = { n -> { m ->
     n(add<T>()(m))(zero())
 }}
