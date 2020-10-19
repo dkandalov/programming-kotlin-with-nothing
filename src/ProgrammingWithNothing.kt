@@ -1,6 +1,4 @@
-@file:Suppress("UNCHECKED_CAST")
-
-import org.junit.Test
+@file:Suppress("UNCHECKED_CAST", "NonAsciiCharacters", "MoveLambdaOutsideParentheses", "FunctionName", "UNUSED_ANONYMOUS_PARAMETER")
 
 typealias λ = (Any) -> Any
 typealias λλ = (Any) -> (Any) -> Any

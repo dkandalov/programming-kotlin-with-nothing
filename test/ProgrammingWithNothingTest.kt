@@ -146,7 +146,7 @@ class ProgrammingWithNothingTest {
 
     @Test fun `fizz buzz`() {
         assertThat(
-            LIST_OF_FIZZ_BUZZ.toList().map{ it.toStr() }.joinToString(", "),
+            LIST_OF_FIZZ_BUZZ.toList().joinToString(", ") { it.toStr() },
             equalTo("1, 2, Fizz, 4, 5, Fizz, 7, 8, Fizz, 10, 11, Fizz, 13, 14, FizzBuzz, " +
                     "16, 17, Fizz, 19, 20, Fizz, 22, 23, Fizz, 25, 26, Fizz, 28, 29, FizzBuzz, " +
                     "31, 32, Fizz, 34, 35, Fizz, 37, 38, Fizz, 40, 41, Fizz, 43, 44, FizzBuzz, " +

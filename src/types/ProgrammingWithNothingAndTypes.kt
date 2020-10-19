@@ -1,6 +1,6 @@
-package types
+@file:Suppress("MoveLambdaOutsideParentheses", "FunctionName")
 
-import org.junit.Test
+package types
 
 
 typealias L<T> = (T) -> T

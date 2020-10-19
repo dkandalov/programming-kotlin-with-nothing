@@ -1,18 +1,9 @@
 package types
 
-import DECREMENT
-import FIVE
-import MULTIPLY
-import ONE
-import THREE
-import TWO
-import ZERO
 import com.natpryce.hamkrest.assertion.assertThat
 import com.natpryce.hamkrest.equalTo
 import org.junit.Test
 import toInt
-import types.toKotlin
-import types.zero
 
 class ProgrammingWithNothingAndTypesTest {
     @Test fun `conversion to kotlin ints`() {
@@ -27,8 +18,8 @@ class ProgrammingWithNothingAndTypesTest {
     }
 
     @Test fun `if function`() {
-        assertThat(if_<String>()(true_())("foo")("bar").toString(), equalTo("foo"))
-        assertThat(if_<String>()(false_())("foo")("bar").toString(), equalTo("bar"))
+        assertThat(if_<String>()(true_())("foo")("bar"), equalTo("foo"))
+        assertThat(if_<String>()(false_())("foo")("bar"), equalTo("bar"))
     }
 
     @Test fun `is zero predicate`() {
